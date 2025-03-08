@@ -2,7 +2,7 @@ import express from "express"
 import path from "path"
 import URL from "./models/url.js"
 import cookieParser from "cookie-parser"
-import { restrictToLoggedInUserOnly,checkAuth } from "./middleware/auth.js"
+import { checkForAuthentication,restrictTo } from "./middleware/auth.js"
 const app = express()
 const port = 8000
 import connectToMongoDb from "./connect.js"
@@ -27,10 +27,11 @@ app.set('views',path.resolve("./views"))
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(cookieParser())
+app.use(checkForAuthentication)
 
-app.use("/url",restrictToLoggedInUserOnly,urlRoute)
+app.use("/url",restrictTo(["NORMAL","ADMIN"]),urlRoute)
 app.use("/user",userRoute)
-app.use("/",checkAuth,staticRoute)
+app.use("/",staticRoute)
 
 app.get("/url/:shortId",handleRedirect)
 
